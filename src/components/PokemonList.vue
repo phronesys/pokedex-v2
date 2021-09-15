@@ -2,20 +2,28 @@
   <div class="pokemon-list nes-container is-rounded">
     <ul>
       <li
-        v-for="pokemon in pokemons"
-        :key="pokemon.id"
+        v-for="(pokemon, index) in pokemonList"
+        :key="index"
         class="nes-container is-rounded nes-btn"
+        @click="$emit('show-pokemon', index)"
       >
         <i class="nes-pokeball"></i>
-        <div class="text">001 Bulbasaur</div>
+        <div class="text">{{pokemon}}</div>
       </li>
     </ul>
     <div class=""></div>
   </div>
 </template>
 
-<script setup>
-import { pokemons } from "../getPokemons";
+<script>
+export default {
+  props: {
+    pokemonList: {
+      type: Array,
+      default: () => []
+    }
+  }
+}
 </script>
 
 <style lang="postcss" scoped>

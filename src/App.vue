@@ -1,32 +1,76 @@
-<script setup></script>
 <template>
   <section>
     <top-bar></top-bar>
     <div class="main">
       <div class="left">
         <div class="nes-container is-rounded">
-          <pokemon-profile></pokemon-profile>
+          <pokemon-profile :pokemon="pokemon">
+          </pokemon-profile>
           <pokedex-buttons></pokedex-buttons>
-          <pokemon-abilities></pokemon-abilities>
+          <pokemon-abilities :pokemon="pokemon"></pokemon-abilities>
         </div>
       </div>
       <div class="right">
         <div>
           <pokemon-search></pokemon-search>
-          <pokemon-list></pokemon-list>
+          <pokemon-list @show-pokemon="selectPokemon" :pokemonList="pokemonList"></pokemon-list>
         </div>
       </div>
     </div>
   </section>
 </template>
-<script setup>
+<script>
 import NessCircle from "./components/NessCircle.vue";
 import PokemonSearch from "./components/PokemonSearch.vue";
 import PokemonList from "./components/PokemonList.vue";
 import TopBar from "./components/TopBar.vue";
 import PokemonProfile from "./components/PokemonProfile.vue";
 import PokemonAbilities from "./components/PokemonAbilities.vue";
-import PokedexButtons from "./components/PokedexButtons.vue"
+import PokedexButtons from "./components/PokedexButtons.vue";
+
+export default {
+  components: {
+    NessCircle,
+    PokemonSearch,
+    PokemonList,
+    TopBar,
+    PokemonProfile,
+    PokemonAbilities,
+    PokedexButtons,
+  },
+  data: () => ({
+    pokemonList: null,
+    selected: 1,
+    pokemon: null,
+  }),
+  methods: {
+    selectPokemon(index){
+      this.selected = index + 1;
+    },
+    async getPokemonList() {
+      return await fetch(`https://pokeapi.co/api/v2/pokemon/?limit=151`)
+        .then((response) => response.json())
+        .then((data) => data.results)
+        .catch((e) => console.log(e));
+    },
+    async getPokemon(index) {
+      return await fetch(`https://pokeapi.co/api/v2/pokemon/${index}`)
+        .then((response) => response.json())
+        .catch((e) => console.log(e));
+    },
+    capitalize(string){
+      return string.charAt(0).toUpperCase() + string.slice(1)
+    }
+  },
+  async mounted() {
+    let pokemonList = await this.getPokemonList();
+    this.pokemonList = pokemonList.map((pokemon) => {
+      return this.capitalize(pokemon.name)
+    });
+    this.pokemon = await this.getPokemon(this.selected);
+    console.log(this.pokemon);
+  },
+};
 </script>
 
 <style lang="postcss">
