@@ -1,15 +1,15 @@
 <template>
   <div class="profile nes-container is-rounded">
     <div class="pokemon-card nes-container is-dark is-rounded with-title">
-      <p class="title">{{ pokemonName }}</p>
-      <img class="w-64 h-64" :src="pokemonSprite" :alt="pokemonName" />
+      <p class="title">{{ name }}</p>
+      <img class="w-64 h-64" :src="sprite" :alt="name" />
     </div>
     <div class="stats nes-container bg-white is-rounded with-title">
       <h1 class="title">Stats</h1>
       <ul>
-        <li  v-for="stat in pokemonStats" :key="stat">
-          <div>{{ stat }}</div>
-          <div>{{ stat}}</div>
+        <li v-for="stat in stats" :key="stat">
+          <div v-if="stat.stat">{{ stat.stat.name }}</div>
+          <div v-if="stat.stat">{{ stat.base_stat }}</div>
         </li>
       </ul>
     </div>
@@ -18,23 +18,7 @@
 
 <script>
 export default {
-  props: ["pokemon"],
-  computed: {
-    pokemonName() {
-      return this.pokemon ? this.capitalize(this.pokemon.name) : "Loading";
-    },
-    pokemonSprite() {
-      return this.pokemon ? this.pokemon.sprites.front_default : "Loading";
-    },
-    pokemonStats() {
-      return this.pokemon ? this.pokemon.stats : "Loading";
-    },
-  },
-  methods: {
-    capitalize(string) {
-      return string.charAt(0).toUpperCase() + string.slice(1);
-    },
-  },
+  props: ["pokemon", "stats", "sprite", "name"],
 };
 </script>
 

@@ -4,16 +4,32 @@
     <div class="main">
       <div class="left">
         <div class="nes-container is-rounded">
-          <pokemon-profile :pokemon="pokemon">
+          <pokemon-profile
+            :stats="pokemonStats"
+            :sprite="pokemonSprite"
+            :name="pokemonName"
+          >
           </pokemon-profile>
           <pokedex-buttons></pokedex-buttons>
-          <pokemon-abilities :pokemon="pokemon"></pokemon-abilities>
+          <pokemon-abilities>
+            <li v-for="(info, index) in abilitiesInfo" :key="info">
+              <div>
+                {{ abilitiesName[index] }}
+              </div>
+              <div>
+                {{ info }}
+              </div>
+            </li>
+          </pokemon-abilities>
         </div>
       </div>
       <div class="right">
         <div>
           <pokemon-search></pokemon-search>
-          <pokemon-list @show-pokemon="selectPokemon" :pokemonList="pokemonList"></pokemon-list>
+          <pokemon-list
+            @show-pokemon="selectPokemon"
+            :pokemonList="pokemonList"
+          ></pokemon-list>
         </div>
       </div>
     </div>
@@ -42,9 +58,22 @@ export default {
     pokemonList: null,
     selected: 1,
     pokemon: null,
+    abilitiesInfo: null,
+    abilitiesName: null,
   }),
+  computed: {
+    pokemonStats() {
+      return this.pokemon ? this.pokemon.stats : "Loading";
+    },
+    pokemonSprite() {
+      return this.pokemon ? this.pokemon.sprites.front_default : "Loading";
+    },
+    pokemonName() {
+      return this.pokemon ? this.capitalize(this.pokemon.name) : "Loading";
+    },
+  },
   methods: {
-    selectPokemon(index){
+    selectPokemon(index) {
       this.selected = index + 1;
     },
     async getPokemonList() {
@@ -58,17 +87,42 @@ export default {
         .then((response) => response.json())
         .catch((e) => console.log(e));
     },
-    capitalize(string){
-      return string.charAt(0).toUpperCase() + string.slice(1)
-    }
+    async getAbilityInfo(url) {
+      return await fetch(url)
+        .then((response) => response.json())
+        .then((data) =>
+          data.effect_entries.filter((entry) => entry.language.name === "en")
+        )
+        .then((entry) => entry[0].short_effect)
+        .catch((e) => console.log(e));
+    },
+    capitalize(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    },
   },
   async mounted() {
     let pokemonList = await this.getPokemonList();
     this.pokemonList = pokemonList.map((pokemon) => {
-      return this.capitalize(pokemon.name)
+      return this.capitalize(pokemon.name);
     });
     this.pokemon = await this.getPokemon(this.selected);
     console.log(this.pokemon);
+
+    this.abilitiesName = await this.pokemon.abilities.map(
+      async (ability) => ability.ability.name
+    );
+    this.abilitiesInfo = await this.pokemon.abilities.map(
+      async (ability) => await this.getAbilityInfo(ability.ability.url)
+    );
+
+    this.abilitiesName = await Promise.all(this.abilitiesName).then(
+      (resolve) => resolve
+    );
+
+    this.abilitiesInfo = await Promise.all(this.abilitiesInfo).then(
+      (resolve) => resolve
+    );
+    console.log(this.abilitiesName, this.abilitiesInfo);
   },
 };
 </script>
