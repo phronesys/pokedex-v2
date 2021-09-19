@@ -1,27 +1,13 @@
 <template>
   <div class="abilities">
     <div class="nes-container is-rounded with-title">
-      <h1 class="title" @click="abilityTab = !abilityTab">
-        <a v-if="abilityTab">Abilities</a>
-        <a v-else>Description</a>
-      </h1>
-      <ul v-if="abilityTab">
-        <li v-for="item in 4" :key="item">
-          <div>Impactrueno</div>
-          <div>25/34</div>
-        </li>
+      <h1 class="title">Abilities</h1>
+      <ul>
+        <slot />
       </ul>
-      <div class="description" v-else>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Cumque omnis odit optio! Voluptates tempora quae quisquam animi asperiores accusantium nihil!
-      </div>
     </div>
   </div>
 </template>
-
-<script setup>
-import {ref} from 'vue';
-let abilityTab = ref(true);
-</script>
 
 <style lang="postcss" scoped>
 .abilities {
@@ -31,7 +17,7 @@ let abilityTab = ref(true);
   @apply bg-white h-[200px] w-full;
 }
 .abilities .nes-container ul {
-  @apply flex flex-row flex-wrap gap-x-16 gap-y-8 ml-16;
+  @apply flex flex-row flex-wrap gap-x-16 gap-y-4 ml-4 py-4 h-full overflow-y-auto;
 }
 .abilities .nes-container h1 {
   @apply space-x-4 select-none;
