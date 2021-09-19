@@ -12,11 +12,15 @@
           </pokemon-profile>
           <pokedex-buttons></pokedex-buttons>
           <pokemon-abilities>
-            <li v-for="(info, index) in abilitiesInfo" :key="info">
-              <div>
+            <li
+              class="ability"
+              v-for="(info, index) in abilitiesInfo"
+              :key="info"
+            >
+              <div class="name">
                 {{ abilitiesName[index] }}
               </div>
-              <div>
+              <div class="info">
                 {{ info }}
               </div>
             </li>
@@ -25,7 +29,7 @@
       </div>
       <div class="right">
         <div>
-          <pokemon-search></pokemon-search>
+          <pokemon-search @filter="filterPokemon"></pokemon-search>
           <pokemon-list
             @show-pokemon="selectPokemon"
             :pokemonList="pokemonList"
@@ -56,10 +60,11 @@ export default {
   },
   data: () => ({
     pokemonList: null,
+    tempList: null,
     selected: 1,
     pokemon: null,
-    abilitiesInfo: null,
-    abilitiesName: null,
+    abilitiesInfo: [],
+    abilitiesName: [],
   }),
   computed: {
     pokemonStats() {
@@ -73,8 +78,22 @@ export default {
     },
   },
   methods: {
-    selectPokemon(index) {
-      this.selected = index + 1;
+    filterPokemon(entry) {
+      if (!entry) return this.resetList();
+      this.pokemonList = this.pokemonList.filter((pokemon) =>
+        pokemon.toLowerCase().includes(entry.toLowerCase())
+      );
+    },
+    resetList() {
+      this.pokemonList = this.tempList;
+    },
+    async selectPokemon(name) {
+      this.selected = this.pokemonIndexByName(name) + 1;
+      await this.updatePokemon();
+    },
+    pokemonIndexByName(name) {
+      console.log(this.tempList, name);
+      return this.tempList.indexOf(name);
     },
     async getPokemonList() {
       return await fetch(`https://pokeapi.co/api/v2/pokemon/?limit=151`)
@@ -99,30 +118,28 @@ export default {
     capitalize(string) {
       return string.charAt(0).toUpperCase() + string.slice(1);
     },
+    async updatePokemon() {
+      this.pokemon = await this.getPokemon(this.selected);
+      this.abilitiesInfo = []; /* clear previous pokemon abilities */
+      this.abilitiesName = this.pokemon.abilities.map((ability) =>
+        this.capitalize(ability.ability.name)
+      );
+      /* get all ability info from the pokemon ability url */
+      await this.pokemon.abilities.map(
+        async (ability) =>
+          await this.getAbilityInfo(ability.ability.url).then((data) =>
+            this.abilitiesInfo.push(data)
+          )
+      );
+    },
   },
   async mounted() {
     let pokemonList = await this.getPokemonList();
     this.pokemonList = pokemonList.map((pokemon) => {
       return this.capitalize(pokemon.name);
     });
-    this.pokemon = await this.getPokemon(this.selected);
-    console.log(this.pokemon);
-
-    this.abilitiesName = await this.pokemon.abilities.map(
-      async (ability) => ability.ability.name
-    );
-    this.abilitiesInfo = await this.pokemon.abilities.map(
-      async (ability) => await this.getAbilityInfo(ability.ability.url)
-    );
-
-    this.abilitiesName = await Promise.all(this.abilitiesName).then(
-      (resolve) => resolve
-    );
-
-    this.abilitiesInfo = await Promise.all(this.abilitiesInfo).then(
-      (resolve) => resolve
-    );
-    console.log(this.abilitiesName, this.abilitiesInfo);
+    this.tempList = this.pokemonList;
+    await this.updatePokemon();
   },
 };
 </script>
@@ -163,7 +180,15 @@ section {
   border: 6px solid rgba(0, 0, 0, 0.8);
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-red-500 rounded-md shadow-lg;
+  @apply bg-indigo-500 rounded-md shadow-lg;
   border: 6px solid rgba(0, 0, 0, 0.5);
+}
+
+/* abilities */
+.ability .name {
+  @apply bg-green-300 max-w-max py-1 px-2 rounded-sm mb-2;
+}
+.ability .info {
+  @apply text-sm;
 }
 </style>
