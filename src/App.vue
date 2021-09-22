@@ -96,10 +96,13 @@ export default {
       return this.tempList.indexOf(name);
     },
     async getPokemonList() {
-      return await fetch(`https://pokeapi.co/api/v2/pokemon/?limit=151`)
-        .then((response) => response.json())
-        .then((data) => data.results)
-        .catch((e) => console.log(e));
+      const response = await fetch(
+        `https://pokeapi.co/api/v2/pokemon/?limit=151`
+      ).catch((e) => e);
+      /* aca puedo siempre ejecutar algo */
+      if (response instanceof Error) return console.log(response.message);
+      
+      return (await response.json()).results; 
     },
     async getPokemon(index) {
       return await fetch(`https://pokeapi.co/api/v2/pokemon/${index}`)
