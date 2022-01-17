@@ -96,7 +96,7 @@ export default {
       return this.tempList.indexOf(name);
     },
     async getPokemonList() {
-      return await fetch(`https://pokeapi.co/api/v2/pokemon/?limit=151`)
+      return await fetch(`https://pokeapi.co/api/v2/pokemon/?limit=897`)
         .then((response) => response.json())
         .then((data) => data.results)
         .catch((e) => console.log(e));
